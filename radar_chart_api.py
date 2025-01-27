@@ -21,7 +21,11 @@ def create_radar_chart(scores):
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(TRAITS)
 
-    img_path = os.path.join("static", "radar_chart.png")
+    static_dir = os.path.join(os.getcwd(), "static")
+    if not os.path.exists(static_dir):
+        os.makedirs(static_dir)
+
+    img_path = os.path.join(static_dir, "radar_chart.png")
     plt.savefig(img_path, format='png')
     plt.close(fig)
     return img_path
@@ -42,11 +46,13 @@ def generate_chart():
             return jsonify({'error': 'All values must be numeric'}), 400
 
         img_path = create_radar_chart(scores)
-        return jsonify({"image_url": request.url_root + img_path})
+        return jsonify({"image_url": request.url_root + "static/radar_chart.png"})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/')
+def home():
+    return jsonify({"message": "Radar Chart API is running. Use POST /generate_chart to generate charts."})
+
 if __name__ == '__main__':
-    if not os.path.exists("static"):
-        os.makedirs("static")
     app.run(host='0.0.0.0', port=5000, debug=True)
