@@ -2,8 +2,8 @@ from flask import Flask, request, jsonify, send_file
 import matplotlib.pyplot as plt
 import numpy as np
 import io
-
-app = Flask(__name__)
+import os
+\app = Flask(__name__)
 
 # Define radar chart labels
 TRAITS = ["Extraversion", "Agreeableness", "Conscientiousness", "Neuroticism", "Openness"]
@@ -20,11 +20,10 @@ def create_radar_chart(scores):
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(TRAITS)
 
-    img_bytes = io.BytesIO()
-    plt.savefig(img_bytes, format='png')
-    img_bytes.seek(0)
+    img_path = os.path.join("static", "radar_chart.png")
+    plt.savefig(img_path, format='png')
     plt.close(fig)
-    return img_bytes
+    return img_path
 
 @app.route('/generate_chart', methods=['POST'])
 def generate_chart():
@@ -41,10 +40,12 @@ def generate_chart():
         if not all(isinstance(score, (int, float)) for score in scores):
             return jsonify({'error': 'All values must be numeric'}), 400
 
-        img_bytes = create_radar_chart(scores)
-        return send_file(img_bytes, mimetype='image/png')
+        img_path = create_radar_chart(scores)
+        return jsonify({"image_url": request.url_root + img_path})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    if not os.path.exists("static"):
+        os.makedirs("static")
     app.run(host='0.0.0.0', port=5000, debug=True)
