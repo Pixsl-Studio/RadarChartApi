@@ -46,7 +46,7 @@ def generate_chart():
             return jsonify({'error': 'All values must be numeric'}), 400
 
         img_path = create_radar_chart(scores)
-        return jsonify({"image_url": request.url_root + "static/radar_chart.png"})
+        return jsonify({request.url_root + "static/radar_chart.png"})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
