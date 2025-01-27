@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import io
 import os
-\app = Flask(__name__)
+
+app = Flask(__name__)
 
 # Define radar chart labels
 TRAITS = ["Extraversion", "Agreeableness", "Conscientiousness", "Neuroticism", "Openness"]
