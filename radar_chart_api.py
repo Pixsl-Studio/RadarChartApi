@@ -26,7 +26,7 @@ def create_radar_chart(scores, filename):
         os.makedirs(static_dir)
 
     img_path = os.path.join(static_dir, filename)
-    plt.savefig(img_path, format='png')
+    plt.savefig(img_path, format='jpeg')
     plt.close(fig)
     return img_path
 
@@ -47,7 +47,7 @@ def generate_chart():
             return jsonify({'error': 'All values must be numeric'}), 400
 
         # Generate unique filename to avoid cache issues
-        filename = f"radar_chart_{np.random.randint(100000)}.png"
+        filename = f"radar_chart_{np.random.randint(100000)}.jpeg"
         create_radar_chart(scores, filename)
 
         # Construct the public URL (ensure Render.com allows static serving)
@@ -65,3 +65,8 @@ def home():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+# requirements.txt
+# Flask==2.0.3
+# matplotlib==3.5.1
+# numpy==1.21.2
