@@ -21,7 +21,10 @@ def create_radar_chart(scores, filename):
     ax.plot(angles, scores, color='blue', linewidth=2)
     ax.set_yticklabels([])
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(TRAITS)
+    ax.set_xticklabels(TRAITS, fontsize=10)  # Adjust font size for better fit
+
+    # Add padding around the chart to prevent cropping
+    fig.subplots_adjust(top=0.85, bottom=0.15, left=0.15, right=0.85)
 
     static_dir = os.path.join(os.getcwd(), "static")
     if not os.path.exists(static_dir):
@@ -30,7 +33,7 @@ def create_radar_chart(scores, filename):
     # Save as PNG first, then convert to JPEG to ensure proper encoding
     png_path = os.path.join(static_dir, filename.replace('.jpeg', '.png'))
     jpeg_path = os.path.join(static_dir, filename)
-    plt.savefig(png_path, format='png', bbox_inches='tight')  # Ensure the whole chart is included
+    plt.savefig(png_path, format='png', bbox_inches='tight', pad_inches=0.5)  # Add padding to ensure nothing is cropped
     plt.close(fig)
 
     # Convert PNG to JPEG using PIL
