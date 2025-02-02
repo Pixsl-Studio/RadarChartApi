@@ -50,12 +50,18 @@ def generate_chart():
         filename = f"radar_chart_{np.random.randint(100000)}.jpeg"
         create_radar_chart(scores, filename)
 
-        # Construct the public URL (ensure Render.com allows static serving)
-        public_url = request.url_root + f"static/{filename}"
+        # Construct the public URL
+        public_url = request.url_root + f"image/{filename}"
 
         return jsonify(public_url)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# Serve image with correct MIME type
+@app.route('/image/<filename>')
+def serve_image(filename):
+    return send_from_directory('static', filename, mimetype='image/jpeg')
 
 
 @app.route('/')
