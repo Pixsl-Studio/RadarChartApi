@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_file
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from PIL import Image
 
 app = Flask(__name__, static_folder='static')
 
@@ -25,10 +26,19 @@ def create_radar_chart(scores, filename):
     if not os.path.exists(static_dir):
         os.makedirs(static_dir)
 
-    img_path = os.path.join(static_dir, filename)
-    plt.savefig(img_path, format='jpeg')
+    # Save as PNG first, then convert to JPEG to ensure proper encoding
+    png_path = os.path.join(static_dir, filename.replace('.jpeg', '.png'))
+    jpeg_path = os.path.join(static_dir, filename)
+    plt.savefig(png_path, format='png')
     plt.close(fig)
-    return img_path
+
+    # Convert PNG to JPEG using PIL
+    with Image.open(png_path) as img:
+        rgb_img = img.convert('RGB')  # Ensure proper JPEG encoding
+        rgb_img.save(jpeg_path, format='JPEG', quality=95)
+
+    os.remove(png_path)  # Remove intermediate PNG file
+    return jpeg_path
 
 
 @app.route('/generate_chart', methods=['POST'])
@@ -48,20 +58,12 @@ def generate_chart():
 
         # Generate unique filename to avoid cache issues
         filename = f"radar_chart_{np.random.randint(100000)}.jpeg"
-        create_radar_chart(scores, filename)
+        image_path = create_radar_chart(scores, filename)
 
-        # Construct the public URL
-        public_url = request.url_root + f"image/{filename}"
-
-        return jsonify(public_url)
+        # Return image directly with correct MIME type
+        return send_file(image_path, mimetype='image/jpeg')
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-# Serve image with correct MIME type
-@app.route('/image/<filename>')
-def serve_image(filename):
-    return send_from_directory('static', filename, mimetype='image/jpeg')
 
 
 @app.route('/')
@@ -76,3 +78,4 @@ if __name__ == '__main__':
 # Flask==2.0.3
 # matplotlib==3.5.1
 # numpy==1.21.2
+# Pillow==9.0.1
