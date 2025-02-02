@@ -53,7 +53,7 @@ def generate_chart():
         # Construct the public URL (ensure Render.com allows static serving)
         public_url = request.url_root + f"static/{filename}"
 
-        return jsonify({public_url})
+        return jsonify(public_url)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
