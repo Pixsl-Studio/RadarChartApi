@@ -15,7 +15,8 @@ def create_radar_chart(scores, filename):
     scores += scores[:1]  # Close the chart
     angles += angles[:1]
 
-    fig, ax = plt.subplots(figsize=(5, 5), subplot_kw={'projection': 'polar'})
+    # Set figure size to match desired dimensions (15cm x 10cm)
+    fig, ax = plt.subplots(figsize=(5.9, 3.9), subplot_kw={'projection': 'polar'})  # 1 inch = 2.54 cm
     ax.fill(angles, scores, color='blue', alpha=0.4)
     ax.plot(angles, scores, color='blue', linewidth=2)
     ax.set_yticklabels([])
@@ -29,7 +30,7 @@ def create_radar_chart(scores, filename):
     # Save as PNG first, then convert to JPEG to ensure proper encoding
     png_path = os.path.join(static_dir, filename.replace('.jpeg', '.png'))
     jpeg_path = os.path.join(static_dir, filename)
-    plt.savefig(png_path, format='png')
+    plt.savefig(png_path, format='png', bbox_inches='tight')  # Ensure the whole chart is included
     plt.close(fig)
 
     # Convert PNG to JPEG using PIL
