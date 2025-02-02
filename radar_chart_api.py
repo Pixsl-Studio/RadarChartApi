@@ -1,15 +1,15 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_from_directory
 import matplotlib.pyplot as plt
 import numpy as np
-import io
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # Define radar chart labels
 TRAITS = ["Extraversion", "Agreeableness", "Conscientiousness", "Neuroticism", "Openness"]
 
-def create_radar_chart(scores):
+
+def create_radar_chart(scores, filename):
     angles = np.linspace(0, 2 * np.pi, len(TRAITS), endpoint=False).tolist()
     scores += scores[:1]  # Close the chart
     angles += angles[:1]
@@ -25,10 +25,11 @@ def create_radar_chart(scores):
     if not os.path.exists(static_dir):
         os.makedirs(static_dir)
 
-    img_path = os.path.join(static_dir, "radar_chart.png")
+    img_path = os.path.join(static_dir, filename)
     plt.savefig(img_path, format='png')
     plt.close(fig)
     return img_path
+
 
 @app.route('/generate_chart', methods=['POST'])
 def generate_chart():
@@ -45,14 +46,22 @@ def generate_chart():
         if not all(isinstance(score, (int, float)) for score in scores):
             return jsonify({'error': 'All values must be numeric'}), 400
 
-        img_path = create_radar_chart(scores)
-        return jsonify(request.url_root + "static/radar_chart.png")
+        # Generate unique filename to avoid cache issues
+        filename = f"radar_chart_{np.random.randint(100000)}.png"
+        create_radar_chart(scores, filename)
+
+        # Construct the public URL (ensure Render.com allows static serving)
+        public_url = request.url_root + f"static/{filename}"
+
+        return jsonify({"image_url": public_url})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/')
 def home():
     return jsonify({"message": "Radar Chart API is running. Use POST /generate_chart to generate charts."})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
